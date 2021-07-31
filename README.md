@@ -4,9 +4,11 @@ Single Header stretchy array / arraylist / vector in C99.
 
 This is my own port of a C stretchy array, based heavily on the implementations in `stb` and `zpl`.
 I put this together mainly as an exercise in understanding those implementations, but also so that
-I had an implementation with the precise names / semantics that I wanted, (namely, macro based
-custom allocators, rather than vtable based ones, and proper error checking for allocations, which
-`stdb_ds.h` doesn't do).
+I had an implementation with the precise names / semantics that I wanted, namely:
+
+- Verbose but not too verbose `array_` namespacing
+- Compile time (macro based) custom allocators, rather than runtime (vtable based) ones
+- Compile time (macro based) configurable, assert based, bounds and allocation failure checks
 
 See `test.c` for full examples, but here is a rough idea of how to use it:
 
