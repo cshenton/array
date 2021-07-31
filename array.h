@@ -1,3 +1,16 @@
+// Copyright 2021 Charlie Shenton
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #ifndef ARRAY_H
 #define ARRAY_H
 
@@ -164,14 +177,14 @@ void *array_ensure_capacity_impl(void *array, size_t capacity, size_t element_si
 
 #ifdef ARRAY_IMPL
 
-#include <stdlib.h>
-
-#ifndef ARRAY_REALLOC
-#define ARRAY_REALLOC(ptr, size) realloc(ptr, size);
+#if (!defined(ARRAY_REALLOC) && defined(ARRAY_FREE)) || (defined(ARRAY_REALLOC) && !defined(ARRAY_FREE))
+#error "Must define both or neither of DE_ALLOC and DE_FREE."
 #endif
 
-#ifndef ARRAY_FREE
-#define ARRAY_FREE(ptr) free(ptr);
+#ifndef ARRAY_REALLOC
+#include <stdlib.h>
+#define ARRAY_REALLOC(ptr, sz) realloc(ptr, sz)
+#define ARRAY_FREE(ptr) free(ptr)
 #endif
 
 void array_free_impl(void *ar)
