@@ -80,7 +80,7 @@ void *array_ensure_capacity_impl(void *array, size_t capacity, size_t element_si
     {                                                                             \
         if (array_count(x) <= idx)                                                \
         {                                                                         \
-            array_append(x, item);                                                \
+            array_push(x, item);                                                  \
             break;                                                                \
         }                                                                         \
         if (array_capacity(x) < array_count(x) + 1)                               \
@@ -93,16 +93,16 @@ void *array_ensure_capacity_impl(void *array, size_t capacity, size_t element_si
     } while (0)
 
 // Appends item_count elements pointed to by items to the end of the array
-#define array_appendn(x, items, item_count)                                  \
-    do                                                                       \
-    {                                                                        \
-        ARRAY_ASSERT(sizeof(*(items)) == sizeof(*(x)));                      \
-        if (array_capacity(x) < array_count(x) + (item_count))               \
-        {                                                                    \
-            array_grow(x, array_count(x) + (item_count));                    \
-        }                                                                    \
-        memcopy(&(x)[array_count(x)], (items), sizeof(*(x)) * (item_count)); \
-        array_header(x)->count += (item_count);                              \
+#define array_appendn(x, items, item_count)                                 \
+    do                                                                      \
+    {                                                                       \
+        ARRAY_ASSERT(sizeof(*(items)) == sizeof(*(x)));                     \
+        if (array_capacity(x) < array_count(x) + (item_count))              \
+        {                                                                   \
+            array_grow(x, array_count(x) + (item_count));                   \
+        }                                                                   \
+        memcpy(&(x)[array_count(x)], (items), sizeof(*(x)) * (item_count)); \
+        array_header(x)->count += (item_count);                             \
     } while (0)
 
 // Inserts item_count elements pointed to by items into the array at idx, moving other elements
@@ -111,7 +111,7 @@ void *array_ensure_capacity_impl(void *array, size_t capacity, size_t element_si
     {                                                                            \
         if (array_count(x) <= idx)                                               \
         {                                                                        \
-            array_appendv(x, items, item_count);                                 \
+            array_appendn(x, items, item_count);                                 \
             break;                                                               \
         }                                                                        \
         ARRAY_ASSERT(sizeof(*(items)) == sizeof(*(x)));                          \
@@ -120,7 +120,7 @@ void *array_ensure_capacity_impl(void *array, size_t capacity, size_t element_si
             array_grow(x, array_count(x) + (item_count));                        \
         }                                                                        \
         memmove(x + idx + (item_count), x + idx, sizeof(*(x)) * array_count(x)); \
-        memcopy(&(x)[idx], (items), sizeof(*(x)) * (item_count));                \
+        memcpy(&(x)[idx], (items), sizeof(*(x)) * (item_count));                 \
         array_header(x)->count += (item_count);                                  \
     } while (0)
 
@@ -134,7 +134,7 @@ void *array_ensure_capacity_impl(void *array, size_t capacity, size_t element_si
     } while (0)
 
 // Removes the last element from the array and returns it
-#define array_pop(x) (array_header(x)->length--, (x)[array_header(x)->length])
+#define array_pop(x) (array_header(x)->count--, (x)[array_header(x)->count])
 
 // Returns the first element of the arraay
 #define array_front(x) x[0]
@@ -143,10 +143,10 @@ void *array_ensure_capacity_impl(void *array, size_t capacity, size_t element_si
 #define array_back(x) x[array_count(x) - 1]
 
 // Clears the array, maintaining its capacity
-#define array_clear(x)                \
-    do                                \
-    {                                 \
-        array_header_t(x)->count = 0; \
+#define array_clear(x)              \
+    do                              \
+    {                               \
+        array_header(x)->count = 0; \
     } while (0)
 
 // Resize the array to contain new_count elements
@@ -158,16 +158,6 @@ void *array_ensure_capacity_impl(void *array, size_t capacity, size_t element_si
             array_grow(x, (new_count));       \
         }                                     \
         array_header(x)->count = (new_count); \
-    } while (0)
-
-// Reserve capacity for new_capacity elements in the array
-#define array_reserve(x, new_capacity)                  \
-    do                                                  \
-    {                                                   \
-        if (array_header(x)->capacity < (new_capacity)) \
-        {                                               \
-            array_ensure_capacity(x, new_capacity);     \
-        }                                               \
     } while (0)
 
 #endif // ARRAY_H
